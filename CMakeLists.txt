@@ -6,8 +6,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+file(GLOB_RECURSE SOURCES
+    CONFIGURE_DEPENDS
+    src/*.cpp
+    src/*.c
+)
+
 add_executable(OpenGLEngine
-    src/main.cpp
+    ${SOURCES}
 )
 
 find_package(OpenGL REQUIRED)
@@ -15,7 +21,7 @@ find_package(OpenGL REQUIRED)
 target_include_directories(OpenGLEngine PRIVATE
     include
     "C:/development/cpp/glfw/glfw-3.5.1/include"
-    "C:/development/cpp/glad/include/"
+    "C:/development/cpp/glad/include"
 )
 
 target_link_libraries(OpenGLEngine PRIVATE
