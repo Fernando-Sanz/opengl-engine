@@ -15,12 +15,17 @@ constexpr float BACKGROUND_COLOR[] = {
 };
 
 
-void configureVertexData(GLuint& vertexArray, GLuint& vertexBuffer, GLsizeiptr size, const void* data);
+void configureVertexBuffers(
+    GLuint& vertexArray,
+    GLuint& vertexBuffer,
+    GLsizeiptr vertexSize, const void* vertices,
+    GLuint& indexBuffer,
+    GLsizeiptr indexSize, const void* indices);
 GLuint createShaderProgram(const char* vertexshaderCode, const char* fragmentshaderCode);
 void checkShaderCompilation(GLuint shader);
 void checkShaderProgramLinking(GLuint shaderProgram);
 void processInput(platform::Window);
-void render();
+void render(GLuint arrayBuffer);
 
 
 int main()
@@ -32,7 +37,12 @@ int main()
     // VBO AND VAO CONFIGURATION
     GLuint vertexArray;
     GLuint vertexBuffer;
-    configureVertexData(vertexArray, vertexBuffer, sizeof(assets::triangleVertices), assets::triangleVertices);
+    GLuint indexBuffer;
+    configureVertexBuffers(vertexArray, vertexBuffer,
+        sizeof(assets::squareVertices), assets::squareVertices,
+        indexBuffer,
+        sizeof(assets::squareIndices), assets::squareIndices
+        );
 
     // SHADER PROGRAM
     unsigned int shaderProgram = createShaderProgram(assets::vertexShaderSource, assets::fragmentShaderSource);
@@ -43,7 +53,7 @@ int main()
     {
         processInput(window);
 
-        render();
+        render(vertexArray);
 
         window.swapBuffers();
 
@@ -57,7 +67,13 @@ int main()
 }
 
 
-void configureVertexData(GLuint& vertexArray, GLuint& vertexBuffer, GLsizeiptr size, const void* data) {
+void configureVertexBuffers(
+    GLuint& vertexArray,
+    GLuint& vertexBuffer,
+    GLsizeiptr vertexSize, const void* vertices,
+    GLuint& indexBuffer,
+    GLsizeiptr indexSize, const void* indices
+) {
     // VERTEX ARRAY OBJECT
     glGenVertexArrays(1, &vertexArray);
     glBindVertexArray(vertexArray);
@@ -65,11 +81,16 @@ void configureVertexData(GLuint& vertexArray, GLuint& vertexBuffer, GLsizeiptr s
     // VERTEX BUFFER
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexSize, vertices, GL_STATIC_DRAW);
 
     // VERTEX ATTRIBUTES DESCRIPTION
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    // INDEX BUFFER
+    glGenBuffers(1, &indexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexSize, indices, GL_STATIC_DRAW);
 }
 
 GLuint createShaderProgram(const char* vertexShaderCode, const char* fragmentShaderCode) {
@@ -125,7 +146,7 @@ void processInput(platform::Window window) {
         window.closeWindow();
 }
 
-void render() {
+void render(GLuint arrayBuffer) {
     // BACKGROUND
     glClearColor(
         BACKGROUND_COLOR[0],
@@ -136,5 +157,7 @@ void render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // RENDER
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
+    glBindVertexArray(arrayBuffer);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
