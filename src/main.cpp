@@ -39,9 +39,11 @@ int main()
     GLuint vertexBuffer;
     GLuint indexBuffer;
     configureVertexBuffers(vertexArray, vertexBuffer,
-        sizeof(assets::squareVertices), assets::squareVertices,
+        //sizeof(assets::squareVertices), assets::squareVertices,
+        sizeof(assets::exercise1Vertices), assets::exercise1Vertices,
         indexBuffer,
-        sizeof(assets::squareIndices), assets::squareIndices
+        //sizeof(assets::squareIndices), assets::squareIndices
+        sizeof(assets::exercise1Indices), assets::exercise1Indices
         );
 
     // SHADER PROGRAM
