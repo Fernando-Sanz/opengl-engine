@@ -27,7 +27,7 @@ GLuint createShaderProgram(const char* vertexshaderCode, const char* fragmentsha
 void checkShaderCompilation(GLuint shader);
 void checkShaderProgramLinking(GLuint shaderProgram);
 void processInput(platform::Window);
-void render(GLuint count, GLuint* arrayBuffer);
+void render(GLuint count, GLuint* arrayBuffer, GLuint* shaderPrograms);
 
 
 int main()
@@ -57,14 +57,15 @@ int main()
 
     // SHADER PROGRAM
     unsigned int shaderProgram = createShaderProgram(assets::vertexShaderSource, assets::fragmentShaderSource);
-    glUseProgram(shaderProgram);
+    unsigned int shaderProgram2 = createShaderProgram(assets::vertexShaderSource, assets::fragmentShaderSource2);
+    std::vector<GLuint> shaderPrograms = {shaderProgram, shaderProgram2};
 
     // RENDER LOOP
     while (!window.shouldClose())
     {
         processInput(window);
 
-        render(VAOs.size(), VAOs.data());
+        render(VAOs.size(), VAOs.data(), shaderPrograms.data());
 
         window.swapBuffers();
 
@@ -157,7 +158,9 @@ void processInput(platform::Window window) {
         window.closeWindow();
 }
 
-void render(GLuint count, GLuint* arrayBuffer) {
+// It would be better if a struct with VAO and shader program was created
+// since it is not usual to have a shader program for each element
+void render(GLuint count, GLuint* arrayBuffer, GLuint* shaderPrograms) {
     // BACKGROUND
     glClearColor(
         BACKGROUND_COLOR[0],
@@ -171,6 +174,7 @@ void render(GLuint count, GLuint* arrayBuffer) {
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
     for (GLuint i = 0; i < count; i++) {
         glBindVertexArray(arrayBuffer[i]);
+        glUseProgram(shaderPrograms[i]);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
