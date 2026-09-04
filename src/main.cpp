@@ -1,5 +1,7 @@
 ﻿#include "main.h"
 
+#include <vector>
+
 #include "platform/Window.h"
 #include "assets/basic_geometry.h"
 #include "assets/vertex_shader.h"
@@ -25,7 +27,7 @@ GLuint createShaderProgram(const char* vertexshaderCode, const char* fragmentsha
 void checkShaderCompilation(GLuint shader);
 void checkShaderProgramLinking(GLuint shaderProgram);
 void processInput(platform::Window);
-void render(GLuint arrayBuffer);
+void render(GLuint count, GLuint* arrayBuffer);
 
 
 int main()
@@ -35,16 +37,23 @@ int main()
     platform::Window window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
 
     // VBO AND VAO CONFIGURATION
-    GLuint vertexArray;
-    GLuint vertexBuffer;
-    GLuint indexBuffer;
-    configureVertexBuffers(vertexArray, vertexBuffer,
-        //sizeof(assets::squareVertices), assets::squareVertices,
-        sizeof(assets::exercise1Vertices), assets::exercise1Vertices,
-        indexBuffer,
-        //sizeof(assets::squareIndices), assets::squareIndices
-        sizeof(assets::exercise1Indices), assets::exercise1Indices
+    GLuint vertexArray1;
+    GLuint vertexBuffer1;
+    GLuint indexBuffer1;
+    configureVertexBuffers(vertexArray1, vertexBuffer1,
+        sizeof(assets::exercise2Vertices1), assets::exercise2Vertices1,
+        indexBuffer1,
+        sizeof(assets::exercise2Indices1), assets::exercise2Indices1
         );
+    GLuint vertexArray2;
+    GLuint vertexBuffer2;
+    GLuint indexBuffer2;
+    configureVertexBuffers(vertexArray2, vertexBuffer2,
+        sizeof(assets::exercise2Vertices2), assets::exercise2Vertices2,
+        indexBuffer2,
+        sizeof(assets::exercise2Indices2), assets::exercise2Indices2
+        );
+    std::vector<GLuint> VAOs = {vertexArray1, vertexArray2};
 
     // SHADER PROGRAM
     unsigned int shaderProgram = createShaderProgram(assets::vertexShaderSource, assets::fragmentShaderSource);
@@ -55,7 +64,7 @@ int main()
     {
         processInput(window);
 
-        render(vertexArray);
+        render(VAOs.size(), VAOs.data());
 
         window.swapBuffers();
 
@@ -148,7 +157,7 @@ void processInput(platform::Window window) {
         window.closeWindow();
 }
 
-void render(GLuint arrayBuffer) {
+void render(GLuint count, GLuint* arrayBuffer) {
     // BACKGROUND
     glClearColor(
         BACKGROUND_COLOR[0],
@@ -160,6 +169,9 @@ void render(GLuint arrayBuffer) {
 
     // RENDER
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
-    glBindVertexArray(arrayBuffer);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    for (GLuint i = 0; i < count; i++) {
+        glBindVertexArray(arrayBuffer[i]);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
 }
